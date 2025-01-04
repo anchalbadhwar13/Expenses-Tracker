@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <fstream>
 using namespace std;
 
 struct Expense {
@@ -10,12 +11,14 @@ struct Expense {
     string date;
 };
 
-void addExpense(vector<Expense>& expenses); // allows me to enter a new expense to the list in vector
+void addExpense(vector<Expense>& expenses, const string& filename); // allows me to enter a new expense to the list in vector
 void viewExpenses(const vector<Expense>& expenses); // allows me to view those expenses
-
+void loadExpenses(vector<Expense>& expenses, const string& filename );
+void saveExpenseToFile(const Expense& expense, const string& filename );
 
 int main(){
         vector<Expense> expenses; // vectoer 'expenses' that holds all the expenses and have the structure of Expense
+        string filename = "expense.txt";
         int choice;
 
         do{
@@ -29,7 +32,7 @@ int main(){
 
         switch (choice){
             case 1: 
-                addExpense(expenses);
+                addExpense(expenses, filename);
                 break;
         
             case 2: 
@@ -48,7 +51,7 @@ int main(){
        return 0;
         }
 
-void addExpense(vector<Expense> & expenses) {
+void addExpense(vector<Expense>& expenses, const string& filename) {
     Expense newExpense;
     
     cout<<" Enter expense category: ";
@@ -60,6 +63,7 @@ void addExpense(vector<Expense> & expenses) {
     getline(cin, newExpense.date);
 
     expenses.push_back(newExpense);
+     saveExpenseToFile(newExpense, filename);
     cout << "Expense add successfully.\n";
 }
 
@@ -84,4 +88,30 @@ void viewExpenses(const vector<Expense>& expenses) {
 // cout<< " Category: " << category << "\n";
 // cout << " Amount: $" << amount << "\n";
 // cout << " Date: " << date << "\n";
+void loadExpenses(vector<Expense>& expenses, const string& filename) {
 
+    ifstream file(filename); // reads from file for input
+    if(!file) {
+        cerr<< "No existing expense file found. Starting fresh.\n";
+        return;
+    }
+    Expense expense;
+    while (file >> expense.category >> expense.amount >> expense.date) {
+      
+        expenses.push_back(expense); // Add to the list
+    }
+
+    file.close();
+    cout<< "Loaded expenses from the file.\n";
+}
+
+void saveExpenseToFile(const Expense& expense, const string& filename) {
+    ofstream file(filename, ios::app); // for writing to files output
+    if(!file) {
+        cerr << "Error: Unable to open file for saving.\n";
+        return;
+    }
+
+    file << expense.category << " " << expense.amount << " " << expense.date << "\n";
+    file.close();
+}
