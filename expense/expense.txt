@@ -1,6 +1,5 @@
-food 200 2024-12-01
-food 200 2024-11-01
-car 500 2025-01-01
-food 200 2025-01-02
-food 200 2902-23-23
-f 200 gggg
+
+Expenses: 
+
+Category      Amount    Date           
+food           3333.00   2024-12-12     
