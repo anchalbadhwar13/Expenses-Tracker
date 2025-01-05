@@ -15,10 +15,14 @@ void addExpense(vector<Expense>& expenses, const string& filename); // allows me
 void viewExpenses(const vector<Expense>& expenses); // allows me to view those expenses
 void loadExpenses(vector<Expense>& expenses, const string& filename );
 void saveExpenseToFile(const Expense& expense, const string& filename );
+void filterExpensesByCategory(const vector<Expense>& expenses); 
+
+
 
 int main(){
         vector<Expense> expenses; // vectoer 'expenses' that holds all the expenses and have the structure of Expense
         string filename = "expense.txt";
+        loadExpenses(expenses, filename);
         int choice;
 
         do{
@@ -26,7 +30,7 @@ int main(){
         cout<<"1. Add Expense\n";
         cout<<"2. View Expenses\n";
         cout<<"3. Exit\n";
-        cout<<" Enter your choice: ";
+        cout<<"   Enter your choice: ";
         cin >> choice;
         cin.ignore(); // to ignore nl char
 
@@ -59,7 +63,7 @@ void addExpense(vector<Expense>& expenses, const string& filename) {
     cout << " Enter amount: " ;
     cin>> newExpense.amount;
     cin.ignore(); // clears the newline character
-    cout << "Enter Date (YYYY-MM-DD): ";
+    cout << " Enter Date (YYYY-MM-DD): ";
     getline(cin, newExpense.date);
 
     expenses.push_back(newExpense);
@@ -114,4 +118,26 @@ void saveExpenseToFile(const Expense& expense, const string& filename) {
 
     file << expense.category << " " << expense.amount << " " << expense.date << "\n";
     file.close();
+}
+
+void filterExpensesByCategory(const vector<Expense>& expenses) {
+    if (expenses.empty) {
+        cout << "No expenses recorded yet.\n";
+        return;
+    }
+
+    string category;
+    cout << "Enter the category to be filtered by: ";
+    getline(cin, category);
+
+    cout << "\nFiltered Expenses for category: "<< category << endl;
+    cout << left << setw(15) << "Category" << setw(10) << "Amount" << setw(15) << "Date" << endl;
+    cout << string(40, '-') << endl;
+
+    bool found = false;
+    for( const auto& expense : expenses) {
+        if(expense.category == category){
+            cout << left<< setw(15) << expense.category << setw(10)<< fixed <<  setprecision(2)<< expense.amount <<setw(15) <<expe
+        }
+    }
 }
