@@ -3,6 +3,8 @@
 #include <vector>
 #include <iomanip>
 #include <fstream>
+#include <unordered_map>
+#include <limits>
 using namespace std;
 
 struct Expense
@@ -19,7 +21,7 @@ void saveExpenseToFile(const Expense &expense, const string &filename);
 void filterExpensesByCategory(const vector<Expense> &expenses);
 void viewTotalExpenses(const vector<Expense> &expenses);
 void clearAllExpenses(vector<Expense> &expenses, const string &filename);
-
+void viewtotalbycategory( const vector<Expense> &expenses);
 int main()
 {
     vector<Expense> expenses; // vectoer 'expenses' that holds all the expenses and have the structure of Expense
@@ -35,7 +37,8 @@ int main()
         cout << "3. Exit\n";
         cout << "4. Filter by Category\n";
         cout << "5. View Total Spent\n";
-        cout << "6. Clear All Expenses\n";
+          cout << "6. View Totals by Category\n";
+        cout << "7. Clear All Expenses\n";
         cout << "   Enter your choice: ";
         cin >> choice;
         cin.ignore(); // to ignore nl char
@@ -61,6 +64,10 @@ int main()
             viewTotalExpenses(expenses);
             break;
         case 6:
+            viewtotalbycategory(expenses);
+            break;
+        
+        case 7:
             clearAllExpenses(expenses, filename);
             break;
         default:
@@ -77,12 +84,25 @@ void addExpense(vector<Expense> &expenses, const string &filename)
 
     cout << " Enter expense category: ";
     getline(cin, newExpense.category); // it reads the entire line of input and allocates it to category
+    while(newExpense.category.empty()){
+        cout << "Category cannot be empty. Please enter a valid category: ";
+        getline(cin, newExpense.category);
+    }
+    
     cout << " Enter amount: ";
-    cin >> newExpense.amount;
+    while(!(cin>>newExpense.amount) ||newExpense.amount <= 0) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout <<" Invalid amount. Please enter a positive number: ";
+    }
+
     cin.ignore(); // clears the newline character
     cout << " Enter Date (YYYY-MM-DD): ";
     getline(cin, newExpense.date);
-
+    while (newExpense.date.size() != 10 ||newExpense.date[4] != '-' || newExpense.date[7] != '-') {
+        cout << "Invalid date format. Please enter in YYYY-MM-DD format: ";
+        getline(cin, newExpense.date);
+    }
     expenses.push_back(newExpense);
     saveExpenseToFile(newExpense, filename);
     cout << "Expense add successfully.\n";
@@ -140,10 +160,9 @@ void saveExpenseToFile(const Expense &expense, const string &filename)
         cerr << "Error: Unable to open file for saving.\n";
         return;
     }
-    
+    //file <<"Expenses\n";
 
-    file << "\nExpenses: \n" << left << setw(15) << "\nCategory" << setw(10) << "Amount" << setw(15) << "Date"   <<
-             "\n"<< left << setw(15) << expense.category
+    file <<  expense.category
              << setw(10) << fixed << setprecision(2) << expense.amount
              << setw(15) << expense.date << endl;
     file.close();
@@ -213,4 +232,26 @@ void clearAllExpenses(vector<Expense> &expenses, const string &filename)
 
     file.close();
     cout << "All expenses have been cleared.\n";
+} 
+
+void viewtotalbycategory( const vector<Expense> &expenses) {
+    if (expenses.empty()) {
+        cout<<" No expenses were recorded yet.\n";
+        return;
+    }
+
+    unordered_map<string, double> categoryTotals;
+
+    for (const auto &expense : expenses) {
+        categoryTotals[expense.category] += expense.amount;
+
+    }
+
+    cout <<"\nTotal Expenses by Category:\n";
+    cout << left << setw(15) << "Category" << setw(10) << "Total" << endl;
+       cout << string(25, '-') << endl;
+
+    for (const auto &pair : categoryTotals) {
+        cout << left << setw(15) << pair.first << setw(10) << fixed << setprecision(2) << pair.second << endl;
+    }
 }
