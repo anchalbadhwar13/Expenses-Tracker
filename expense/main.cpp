@@ -15,13 +15,15 @@ struct Expense
 };
 
 void addExpense(vector<Expense> &expenses, const string &filename); // allows me to enter a new expense to the list in vector
-void viewExpenses(const vector<Expense> &expenses);                 // allows me to view those expenses
+void viewExpenses(const vector<Expense> &e3xpenses);                 // allows me to view those expenses
 void loadExpenses(vector<Expense> &expenses, const string &filename);
 void saveExpenseToFile(const Expense &expense, const string &filename);
 void filterExpensesByCategory(const vector<Expense> &expenses);
 void viewTotalExpenses(const vector<Expense> &expenses);
 void clearAllExpenses(vector<Expense> &expenses, const string &filename);
 void viewtotalbycategory( const vector<Expense> &expenses);
+void editExpense (vector<Expense> &expenses, const string &filename);
+void deleteExpense(vector<Expense> &expenses, const string &filename);
 int main()
 {
     vector<Expense> expenses; // vectoer 'expenses' that holds all the expenses and have the structure of Expense
@@ -34,11 +36,13 @@ int main()
         cout << "\nExpense Manager\n";
         cout << "1. Add Expense\n";
         cout << "2. View Expenses\n";
-        cout << "3. Exit\n";
-        cout << "4. Filter by Category\n";
-        cout << "5. View Total Spent\n";
-          cout << "6. View Totals by Category\n";
-        cout << "7. Clear All Expenses\n";
+        cout << "3. Edit Expense\n";
+        cout << "4. Delete Expense\n";
+        cout << "5. Filter by Category\n";
+        cout << "6. View Total Spent\n";
+        cout << "7. View Totals by Category\n";
+        cout << "8. Clear All Expenses\n";
+        cout << "9. Exit\n";
         cout << "   Enter your choice: ";
         cin >> choice;
         cin.ignore(); // to ignore nl char
@@ -52,24 +56,31 @@ int main()
         case 2:
             viewExpenses(expenses);
             break;
-
         case 3:
-            cout << "Exiting Program.\n";
+            editExpense(expenses, filename);
             break;
 
         case 4:
+            deleteExpense(expenses, filename);
+            break;
+        
+        case 5:
             filterExpensesByCategory(expenses);
             break;
-        case 5:
+        case 6:
             viewTotalExpenses(expenses);
             break;
-        case 6:
+        case 7:
             viewtotalbycategory(expenses);
             break;
         
-        case 7:
+        case 8:
             clearAllExpenses(expenses, filename);
             break;
+        case 9:
+            cout << "Exiting Program.\n";
+            break;
+    
         default:
             cout << "Invalid choice. Please try again.\n";
         }
@@ -254,4 +265,90 @@ void viewtotalbycategory( const vector<Expense> &expenses) {
     for (const auto &pair : categoryTotals) {
         cout << left << setw(15) << pair.first << setw(10) << fixed << setprecision(2) << pair.second << endl;
     }
+}
+
+void editExpense(vector<Expense> &expenses, const string &filename)
+{
+    if (expenses.empty())
+    {
+        cout << "No expenses recorded yet.\n";
+        return;
+    }
+
+    string date;
+    cout << "Enter the date of the expense you want to edit (YYYY-MM-DD): ";
+    getline(cin, date);
+
+    for (auto &expense : expenses)
+    {
+        if (expense.date == date)
+        {
+            cout << "Editing expense on " << expense.date << endl;
+            cout << "Current category: " << expense.category << endl;
+            cout << "Current amount: $" << fixed << setprecision(2) << expense.amount << endl;
+
+            cout << "Enter new category: ";
+            getline(cin, expense.category);
+
+            cout << "Enter new amount: ";
+            while (!(cin >> expense.amount) || expense.amount <= 0)
+            {
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << "Invalid amount. Please enter a positive number: ";
+            }
+
+            cin.ignore();  // To discard the newline character from previous input
+            cout << "Enter new date (YYYY-MM-DD): ";
+            getline(cin, expense.date);
+
+            saveExpenseToFile(expense, filename); // Update the file
+            cout << "Expense updated successfully.\n";
+            return;
+        }
+    }
+
+    cout << "No expense found for the given date.\n";
+}
+
+void deleteExpense(vector<Expense> &expenses, const string &filename)
+{
+    if (expenses.empty()) // Check if the vector is empty
+    {
+        cout << "No expenses recorded yet.\n";
+        return; // Exit the function if no expenses to delete
+    }
+
+    string date;
+    cout << "Enter the date of the expense you want to delete (YYYY-MM-DD): "; // Prompt for the date
+    getline(cin, date); // Read the date from the user
+
+    for (auto it = expenses.begin(); it != expenses.end(); ++it) // Iterate through the expenses
+    {
+        if (it->date == date) // Check if the date matches
+        {
+            expenses.erase(it); // Remove the expense from the vector
+            cout << "Expense deleted successfully.\n";
+
+            // Save all the remaining expenses back to the file
+            // Use your existing function here
+            ofstream file(filename, ios::trunc); // Open the file in truncation mode (overwrite the file)
+            if (!file)
+            {
+                cerr << "Error: Unable to open file for saving.\n";
+                return;
+            }
+
+            // Save all expenses to the file again
+            for (const auto &expense : expenses)
+            {
+                file << expense.category << " " << expense.amount << " " << expense.date << "\n";
+            }
+
+            file.close();
+            return; // Exit the function after deleting the expense and saving the file
+        }
+    }
+
+    cout << "No expense found for the given date.\n"; // If no matching expense is found
 }
